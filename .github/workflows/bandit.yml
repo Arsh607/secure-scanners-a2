@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write   
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,37 +28,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install bandit
 
-      - name: Run Bandit and generate SARIF
+      - name: Run Bandit
         shell: bash
         run: |
-          # Try to generate SARIF; do not fail the job on findings
           bandit -r . -f sarif -o bandit-results.sarif || true
-
-          # If Bandit produced no SARIF (empty or missing), write a MINIMAL valid SARIF
+          bandit -r . -f txt   -o bandit-results.txt   || true
           if [ ! -s bandit-results.sarif ]; then
             cat > bandit-results.sarif << 'EOF'
-            {
-              "version": "2.1.0",
-              "runs": [
-                {
-                  "tool": {
-                    "driver": {
-                      "name": "bandit",
-                      "informationUri": "https://bandit.readthedocs.io",
-                      "rules": []
-                    }
-                  },
-                  "results": [],
-                  "invocations": [
-                    { "executionSuccessful": true }
-                  ]
-                }
-              ]
-            }
+            {"version":"2.1.0","runs":[{"tool":{"driver":{"name":"bandit","informationUri":"https://bandit.readthedocs.io","rules":[]}},"results":[],"invocations":[{"executionSuccessful":true}]}]}
             EOF
           fi
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-outputs
+          path: |
+            bandit-results.sarif
+            bandit-results.txt
+
       - name: Upload SARIF to Code Scanning
         uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        continue-on-error: true
         with:
           sarif_file: bandit-results.sarif
