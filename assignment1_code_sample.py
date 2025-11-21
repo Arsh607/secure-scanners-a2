@@ -7,7 +7,7 @@ db_config = {
     'user': 'admin',
     'password': 'secret123'
 }
-#test
+#test 
 def get_user_input():
     user_input = input('Enter your name: ')
     return user_input
@@ -34,3 +34,12 @@ if __name__ == '__main__':
     data = get_data()
     save_to_db(data)
     send_email('admin@example.com', 'User Input', user_input)
+
+##Reflection
+#Speed & workflow: CodeSweep (instant on save + quick CI) vs CodeQL (deeper, slower) vs Bandit (Python-focused, fast).
+
+#Findings: name one or two concrete issues each flagged or missed.
+
+#Signal/noise: clarity of messages; any false positives/negatives.
+
+#Why multiple scanners: broader coverage + earlier feedback (IDE) + CI gate = fewer escapes.
